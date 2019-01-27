@@ -4,8 +4,11 @@ const User = use('App/Models/User');
 
 class AuthController {
 
-  async login ({ request, response, view }) 
+  async login ({ request, response, auth }) 
   {
+    const { email, password } = request.all();
+    const user = await auth.attempt(email, password);
+    return response.json(user);
 
   }
 
@@ -22,6 +25,18 @@ class AuthController {
     return response.json(user);
   }
 
+  async profile({ response, auth })
+  {
+    const user = await auth.getUser();
+    return response.json(user);
+  }
+
+  async revokeUserToken({ response, auth })
+  {
+    const user = await auth.getUser();
+    await user.tokens().update({is_revoked: true});
+    return response.status(204).json(null);
+  }
 }
 
 module.exports = AuthController
